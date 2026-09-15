@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Campus Assist — Your semester, sorted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1B2A4A;
+    --ink-soft: #33456B;
+    --parchment: #EDE6D6;
+    --paper: #FAF8F3;
+    --gold: #C9A227;
+    --gold-deep: #9C7D14;
+    --charcoal: #26241F;
+    --line: rgba(27,42,74,0.16);
+    --radius-note: 3px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:'Source Sans 3', sans-serif;
+    line-height:1.55;
+  }
+
+  h1,h2,h3, .display{
+    font-family:'Fraunces', serif;
+    color:var(--ink);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  a{ color:inherit; }
+
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 20px; }
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .topbar-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 0;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .brand span{
+    font-family:'Source Sans 3', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    color:var(--gold-deep);
+    border:1px solid var(--gold);
+    border-radius:999px;
+    padding:2px 10px;
+  }
+  nav{
+    display:flex;
+    gap:28px;
+    font-size:14px;
+    font-weight:600;
+  }
+  nav a{ text-decoration:none; color:var(--ink-soft); }
+  nav a:hover{ color:var(--gold-deep); }
+  @media (max-width:720px){ nav{ display:none; } }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:72px 0 56px;
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:56px;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    .hero{ grid-template-columns:1fr; padding:48px 0 36px; }
+  }
+
+  .hero h1{
+    font-size:clamp(38px, 5vw, 60px);
+    font-weight:500;
+    line-height:1.04;
+  }
+  .hero .lede{
+    margin-top:22px;
+    font-size:18px;
+    max-width:46ch;
+    color:var(--ink-soft);
+  }
+  .hero-cta{
+    margin-top:32px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-block;
+    padding:13px 24px;
+    font-weight:600;
+    font-size:15px;
+    text-decoration:none;
+    border-radius:2px;
+    border:1px solid var(--ink);
+  }
+  .btn-primary{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .btn-primary:hover{ background:var(--ink-soft); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+  }
+  .btn-ghost:hover{ background:rgba(27,42,74,0.06); }
+
+  .campus-meta{
+    margin-top:34px;
+    display:flex;
+    gap:26px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .campus-meta strong{
+    display:block;
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    color:var(--ink);
+    font-weight:500;
+  }
+
+  /* ---------- Chat card (hero visual) ---------- */
+  .chat-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    overflow:hidden;
+  }
+  .chat-head{
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--parchment);
+  }
+  .chat-head .who{
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .chat-head .status{
+    font-size:12px;
+    color:var(--gold-deep);
+    font-weight:600;
+  }
+  .chat-body{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .bubble{
+    max-width:85%;
+    padding:11px 14px;
+    font-size:14.5px;
+    border-radius:3px;
+    line-height:1.5;
+  }
+  .bubble.user{
+    align-self:flex-end;
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .bubble.ai{
+    align-self:flex-start;
+    background:var(--parchment);
+    color:var(--charcoal);
+    border-left:2px solid var(--gold);
+  }
+  .bubble.ai .tag{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--gold-deep);
+    margin-bottom:4px;
+  }
+  .chat-input{
+    border-top:1px solid var(--line);
+    padding:14px 20px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  .chat-input .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--gold);
+    flex:none;
+  }
+
+  /* ---------- Section shared ---------- */
+  section{ padding:64px 0; }
+  .section-head{
+    display:grid;
+    grid-template-columns:200px 1fr;
+    gap:32px;
+    margin-bottom:40px;
+    border-top:1px solid var(--line);
+    padding-top:22px;
+  }
+  @media (max-width:720px){
+    .section-head{ grid-template-columns:1fr; gap:8px; }
+  }
+  .section-head .index{
+    font-size:13px;
+    color:var(--gold-deep);
+    font-weight:700;
+  }
+  .section-head h2{
+    font-size:30px;
+    font-weight:500;
+  }
+  .section-head p{
+    grid-column:2;
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin-top:10px;
+  }
+  @media (max-width:720px){ .section-head p{ grid-column:1; } }
+
+  /* ---------- Schedule / features as a "class schedule" ---------- */
+  .schedule{
+    border-top:1px solid var(--line);
+  }
+  .period{
+    display:grid;
+    grid-template-columns:120px 1fr 1.4fr;
+    gap:24px;
+    padding:26px 0;
+    border-bottom:1px solid var(--line);
+    align-items:start;
+  }
+  @media (max-width:760px){
+    .period{ grid-template-columns:1fr; gap:8px; }
+  }
+  .period .time{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    color:var(--gold-deep);
+    font-weight:600;
+    padding-top:2px;
+  }
+  .period h3{
+    font-size:19px;
+    font-weight:500;
+  }
+  .period .desc{
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+
+  /* ---------- How it works (asymmetric list, not numbered circles) ---------- */
+  .flow{
+    display:flex;
+    flex-direction:column;
+  }
+  .flow-row{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:20px;
+    padding:22px 0;
+    border-top:1px solid var(--line);
+  }
+  .flow-row:last-child{ border-bottom:1px solid var(--line); }
+  .flow-row .mark{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--gold);
+    font-size:26px;
+  }
+  .flow-row h3{ font-size:18px; font-weight:600; font-family:'Source Sans 3', sans-serif; color:var(--ink); }
+  .flow-row p{ margin-top:6px; color:var(--ink-soft); max-width:60ch; font-size:15px;}
+
+  /* ---------- Quote / trust ---------- */
+  .quote{
+    background:var(--ink);
+    color:var(--paper);
+    padding:64px 0;
+  }
+  .quote blockquote{
+    font-family:'Fraunces', serif;
+    font-size:clamp(24px,3.4vw,34px);
+    font-weight:500;
+    line-height:1.35;
+    max-width:26ch;
+    margin:0;
+  }
+  .quote cite{
+    display:block;
+    margin-top:20px;
+    font-style:normal;
+    font-size:14px;
+    color:#C9C2AE;
+  }
+
+  /* ---------- Footer / CTA ---------- */
+  footer{
+    padding:56px 0 40px;
+    border-top:1px solid var(--line);
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr 1fr;
+    gap:32px;
+  }
+  @media (max-width:720px){ .footer-grid{ grid-template-columns:1fr; } }
+  .footer-grid h4{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+  .footer-grid ul{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex; flex-direction:column; gap:8px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .foot-note{
+    margin-top:44px;
+    font-size:13px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">Campus Assist <span>AI</span></div>
+    <nav>
+      <a href="#today">Today</a>
+      <a href="#works">How it works</a>
+      <a href="#offices">Offices covered</a>
+      <a href="#access">Get access</a>
+    </nav>
+    <a href="#access" class="btn btn-primary" style="padding:9px 18px; font-size:13px;">Sign in with campus ID</a>
+  </div>
+</div>
+
+<header class="wrap hero">
+  <div>
+    <h1>Ask your campus<br>anything. Get a<br>straight answer.</h1>
+    <p class="lede">One assistant for registrar deadlines, dining hall hours, financial aid forms, and the fastest walk between two buildings — trained on your university's actual calendars, policies, and floor plans.</p>
+    <div class="hero-cta">
+      <a href="#access" class="btn btn-primary">Get campus access</a>
+      <a href="#works" class="btn btn-ghost">See how it works</a>
+    </div>
+    <div class="campus-meta">
+      <div><strong>140+</strong>offices &amp; departments indexed</div>
+      <div><strong>24/7</strong>during finals and add/drop</div>
+      <div><strong>&lt; 10s</strong>average answer time</div>
+    </div>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-head">
+      <div class="who">Campus Assist</div>
+      <div class="status">● answering from live term calendar</div>
+    </div>
+    <div class="chat-body">
+      <div class="bubble user">is the writing center open the sunday before finals?</div>
+      <div class="bubble ai"><span class="tag">Checked: Library &amp; Learning Commons hours</span>Yes — extended hours that Sunday, 11am–9pm in Library room 214. Regular Sunday hours resume the week after.</div>
+      <div class="bubble user">and can I still drop BIO 210 without a W?</div>
+      <div class="bubble ai"><span class="tag">Checked: Registrar drop deadlines, your enrollment</span>The no-penalty drop deadline was Sept 12. You're past it — dropping now records a W. Want the link to petition for a late drop?</div>
+    </div>
+    <div class="chat-input"><span class="dot"></span> Ask about classes, offices, dining, housing, events…</div>
+  </div>
+</header>
+
+<section id="today">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">What it handles</div>
+      <div>
+        <h2>The questions that used to cost you three tabs and a phone call</h2>
+        <p>Campus Assist reads the same source documents your offices do — it just answers faster, and it doesn't put you on hold.</p>
+      </div>
+    </div>
+
+    <div class="schedule">
+      <div class="period">
+        <div class="time">Registrar</div>
+        <h3>Deadlines, holds, and enrollment</h3>
+        <div class="desc">Add/drop dates, W-grade cutoffs, hold explanations pulled from your own student record, transcript request status.</div>
+      </div>
+      <div class="period">
+        <div class="time">Financial aid</div>
+        <h3>Forms, disbursement, and appeals</h3>
+        <div class="desc">What's missing from your file, when aid disburses relative to tuition due dates, and how to start a SAP appeal.</div>
+      </div>
+      <div class="period">
+        <div class="time">Facilities</div>
+        <h3>Hours, rooms, and routes</h3>
+        <div class="desc">Dining hall menus and closing times, library and lab hours by building, and the shortest indoor route in bad weather.</div>
+      </div>
+      <div class="period">
+        <div class="time">Advising</div>
+        <h3>Requirements and what-ifs</h3>
+        <div class="desc">Degree audit gaps, prerequisite chains, and whether a course substitution is likely to be approved before you ask an advisor.</div>
+      </div>
+      <div class="period">
+        <div class="time">Housing &amp; ID</div>
+        <h3>Move-in, meal plans, replacements</h3>
+        <div class="desc">Move-in windows by building, meal plan swaps before the deadline, and how to replace a lost campus ID today, not next week.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="works">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">How it works</div>
+      <div>
+        <h2>Grounded in your campus, not the open web</h2>
+        <p>Every answer traces back to a document, calendar, or system your university already maintains — so it stays right when policies change mid-semester.</p>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-row">
+        <div class="mark">a.</div>
+        <div>
+          <h3>It reads what your offices publish</h3>
+          <p>Registrar bulletins, dining menus, library hours, housing contracts, advising sheets — indexed directly from the offices that own them, refreshed as they change.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="mark">b.</div>
+        <div>
+          <h3>It checks against your own record</h3>
+          <p>With your sign-in, it can see your enrollment, holds, and aid status — so an answer about "your" deadline is actually about your deadline, not the general catalog.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="mark">c.</div>
+        <div>
+          <h3>It tells you where an answer came from</h3>
+          <p>Every response names the office or document behind it, so you can go straight to the source — or the right human — when a question needs a real person.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="mark">d.</div>
+        <div>
+          <h3>It hands off cleanly when it should</h3>
+          <p>Appeals, accommodations, and anything requiring judgment get routed to the right office with your context attached, instead of a dead-end chatbot loop.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="quote">
+  <div class="wrap">
+    <blockquote>"I stopped calling the registrar during add/drop week. It just told me my hold was a parking fine."</blockquote>
+    <cite>— Third-year, Environmental Science</cite>
+  </div>
+</div>
+
+<section id="offices">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">Coverage</div>
+      <div>
+        <h2>Built with the offices, not around them</h2>
+        <p>Each department reviews and owns the answers pulled from its documents — Campus Assist doesn't guess on policy.</p>
+      </div>
+    </div>
+    <div class="schedule">
+      <div class="period">
+        <div class="time">Verified</div>
+        <h3>Registrar, Bursar, Financial Aid</h3>
+        <div class="desc">Policy language and deadlines confirmed directly with each office each term.</div>
+      </div>
+      <div class="period">
+        <div class="time">Verified</div>
+        <h3>Housing, Dining, Campus Safety</h3>
+        <div class="desc">Live hours and contact routing kept in sync with facilities scheduling systems.</div>
+      </div>
+      <div class="period">
+        <div class="time">In review</div>
+        <h3>Career Services, International Student Office</h3>
+        <div class="desc">Coverage expanding this term as each office finishes document review.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="access">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4>Campus Assist</h4>
+        <p style="color:var(--ink-soft); font-size:14px; max-width:34ch; margin:0;">A single, accurate front door to the offices that run your university — built with those offices, not instead of them.</p>
+      </div>
+      <div>
+        <h4>Get access</h4>
+        <ul>
+          <li>Sign in with your campus ID</li>
+          <li>Available on web and campus app</li>
+          <li>No install required</li>
+        </ul>
+      </div>
+      <div>
+        <h4>For staff &amp; offices</h4>
+        <ul>
+          <li>Claim your office's answers</li>
+          <li>Review response accuracy</li>
+          <li>Request a coverage area</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>A concept interface — not affiliated with any specific institution.</span>
+      <span>Made for demonstration purposes.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
